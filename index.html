@@ -3,31 +3,62 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#071b18">
-  <title>Health Vision</title>
+  <meta name="theme-color" content="#081a17">
+  <title>MamaAI Health Vision</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="stylesheet" href="styles.css">
   <script defer src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <script defer src="app.js"></script>
 </head>
 <body>
   <main class="shell">
-    <header><div><span class="eyebrow">Персональный помощник</span><h1>Health Vision</h1></div><span id="status" class="status">Готов к запуску</span></header>
+    <header>
+      <div><span class="eyebrow">Персональный помощник Романа</span><h1>MamaAI <em>Health Vision</em></h1></div>
+      <span id="status" class="status" aria-live="polite">Готов к запуску</span>
+    </header>
+
     <section class="hero">
       <div class="camera-card">
         <video id="video" playsinline muted></video><canvas id="overlay"></canvas>
         <div id="cameraPlaceholder" class="placeholder"><div class="lens">◉</div><b>Камера выключена</b><span>Нажмите «Начать наблюдение»</span></div>
-        <div class="controls"><button id="startBtn" class="primary">Начать наблюдение</button><button id="stopBtn" disabled>Остановить</button></div>
+        <div class="controls">
+          <button id="startBtn" class="primary">▶ Начать наблюдение</button>
+          <button id="medicineScanBtn" disabled>💊 Проверить лекарство</button>
+          <button id="stopBtn" disabled>Остановить</button>
+        </div>
       </div>
-      <aside class="today"><span class="eyebrow">Сегодня</span><div class="metric"><strong id="waterTotal">0</strong><span>мл воды</span></div><div class="metric"><strong id="medicineTotal">0</strong><span>приёмов лекарств</span></div><div id="assistantText" class="assistant">Я буду замечать бутылки и чашки, а перед записью обязательно спрошу подтверждение.</div></aside>
+      <aside class="today">
+        <span class="eyebrow">Сегодня</span>
+        <div class="metric"><strong id="waterTotal">0</strong><span>мл воды</span></div>
+        <div class="metric"><strong id="medicineTotal">0</strong><span>приёмов лекарств</span></div>
+        <div id="assistantText" class="assistant" aria-live="assertive">Я замечу стакан или бутылку, а перед записью обязательно спрошу вас.</div>
+        <div class="listening"><span id="micDot"></span><span id="micState">Микрофон ожидает диалога</span></div>
+      </aside>
     </section>
+
     <section class="grid">
-      <article><h2>Быстрая запись</h2><div class="quick"><button data-action="water">＋ Вода</button><button data-action="medicine">＋ Лекарство</button></div><p class="hint">Используйте, если камера не распознала предмет.</p></article>
-      <article><div class="title-row"><h2>Журнал</h2><button id="clearBtn" class="link">Очистить</button></div><div id="log" class="log"><p class="empty">Записей пока нет</p></div></article>
+      <article>
+        <h2>Быстрая запись</h2>
+        <div class="quick"><button data-action="water">＋ Вода</button><button data-action="medicine">＋ Лекарство</button></div>
+        <p class="hint">Если камера не распознала предмет, можно начать тот же голосовой диалог вручную.</p>
+        <button id="exportBtn" class="wide">Скачать журнал CSV</button>
+      </article>
+      <article>
+        <div class="title-row"><h2>Журнал здоровья</h2><button id="clearBtn" class="link">Очистить</button></div>
+        <div id="log" class="log"><p class="empty">Записей пока нет</p></div>
+      </article>
     </section>
-    <footer>Данные сохраняются только на этом устройстве. Не используйте приложение для изменения назначений врача.</footer>
+    <section class="notice"><b>Важно:</b> название лекарства, прочитанное камерой, всегда требует вашего подтверждения. Приложение не определяет дозировку и не заменяет врача.</section>
   </main>
-  <dialog id="confirmDialog"><form method="dialog"><span id="dialogIcon" class="dialog-icon">💧</span><h2 id="dialogTitle">Подтверждение</h2><p id="dialogText"></p><label id="inputWrap"><span id="inputLabel">Количество</span><input id="detailInput" autocomplete="off"></label><div class="dialog-actions"><button value="cancel">Нет, ошибка</button><button id="confirmBtn" value="confirm" class="primary">Да, записать</button></div></form></dialog>
+
+  <dialog id="dialog">
+    <form method="dialog">
+      <span id="dialogIcon" class="dialog-icon">💧</span><h2 id="dialogTitle">Подтверждение</h2><p id="dialogText"></p>
+      <label><span id="inputLabel">Количество</span><input id="detailInput" autocomplete="off"></label>
+      <div class="dialog-actions"><button value="cancel">Нет, ошибка</button><button id="confirmBtn" value="confirm" class="primary">Да, записать</button></div>
+    </form>
+  </dialog>
 </body>
 </html>
