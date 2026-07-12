@@ -20,6 +20,7 @@
       <div class="camera-card">
         <video id="video" playsinline autoplay muted></video>
         <canvas id="capture" hidden></canvas>
+        <canvas id="tracking" class="tracking-overlay"></canvas>
         <div id="placeholder" class="placeholder"><div class="lens">◉</div><b>Камера выключена</b><span>Нажмите «Запустить помощника»</span></div>
         <div id="scanFlash" class="scan-flash"></div>
         <div class="controls">
@@ -37,6 +38,13 @@
         <div class="metric"><strong id="medicineTotal">0</strong><span>приёмов лекарств</span></div>
         <div id="assistantText" class="assistant" aria-live="assertive">Я локально отслеживаю руки, анализирую серию кадров и постоянно слушаю только команды о воде и лекарствах.</div>
         <div class="listening"><span id="micDot"></span><span id="micState">Микрофон ожидает диалога</span></div>
+        <div class="telemetry">
+          <span>Лицо <b id="faceMetric">—</b></span><span>Голова <b id="headMetric">—</b></span>
+          <span>Моргание <b id="blinkMetric">—</b></span><span>Улыбка <b id="smileMetric">—</b></span>
+          <span>Руки <b id="handsMetric">0</b></span><span>Жест <b id="gestureMetric">—</b></span>
+          <span>Поза <b id="poseMetric">—</b></span><span>FPS <b id="fpsMetric">0</b></span>
+          <span>Нагрузка <b id="loadMetric">—</b></span>
+        </div>
       </aside>
     </section>
 
@@ -56,6 +64,9 @@
           <label>Защита от повторов, сек.<input id="cooldownSeconds" type="number" min="20" max="600" value="75"></label>
           <label>Стакан по умолчанию, мл<input id="defaultWater" type="number" min="20" max="2000" value="250"></label>
           <label class="check"><input id="autoScan" type="checkbox" checked> Автоматически анализировать</label>
+          <label class="check"><input id="showFace" type="checkbox" checked> Сетка лица</label>
+          <label class="check"><input id="showHands" type="checkbox" checked> Скелет рук</label>
+          <label class="check"><input id="showPose" type="checkbox" checked> Скелет тела</label>
         </div>
         <div class="quick"><button data-action="water">＋ Записать воду голосом</button><button data-action="medicine">＋ Записать лекарство голосом</button></div>
       </article>
