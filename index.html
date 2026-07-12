@@ -13,7 +13,7 @@
   <main class="shell">
     <header class="topbar">
       <div><span class="eyebrow">MamaAI • Web 2.0</span><h1>Health <em>Vision</em></h1></div>
-      <div class="badges"><span id="onlineBadge" class="badge">Онлайн</span><span id="cameraBadge" class="badge off">Камера</span><span id="micBadge" class="badge off">Микрофон</span></div>
+      <div class="badges"><span id="onlineBadge" class="badge">Онлайн</span><span id="cameraBadge" class="badge off">Камера</span><span id="micBadge" class="badge off">Микрофон</span><span id="handBadge" class="badge off">Руки</span></div>
     </header>
 
     <section class="hero">
@@ -35,7 +35,7 @@
         <div class="metric"><strong id="waterTotal">0</strong><span>мл воды</span></div>
         <div class="metric"><strong id="waterCount">0</strong><span>эпизодов питья</span></div>
         <div class="metric"><strong id="medicineTotal">0</strong><span>приёмов лекарств</span></div>
-        <div id="assistantText" class="assistant" aria-live="assertive">Я увижу предметы в руках и обязательно спрошу вас перед записью.</div>
+        <div id="assistantText" class="assistant" aria-live="assertive">Я локально отслеживаю руки, анализирую серию кадров и постоянно слушаю только команды о воде и лекарствах.</div>
         <div class="listening"><span id="micDot"></span><span id="micState">Микрофон ожидает диалога</span></div>
       </aside>
     </section>
@@ -46,13 +46,13 @@
         <label class="field"><span>Gemini API key</span><input id="apiKey" type="password" autocomplete="off" placeholder="Вставьте ключ один раз"></label>
         <label class="check"><input id="rememberKey" type="checkbox"> Запомнить ключ в этом браузере</label>
         <button id="saveKeyBtn" class="wide">Подключить Google AI</button>
-        <p id="keyStatus" class="hint">Ключ нужен для распознавания действий и текста на лекарствах.</p>
+        <p id="keyStatus" class="hint">Ключ используется только из этого браузера. Для постоянной работы безопаснее следующий серверный этап с временными токенами.</p>
       </article>
 
       <article>
         <h2>Автоматический режим</h2>
         <div class="settings">
-          <label>Проверять кадр каждые, сек.<input id="scanSeconds" type="number" min="5" max="120" value="12"></label>
+          <label>Проверять кадр каждые, сек.<input id="scanSeconds" type="number" min="5" max="120" value="8"></label>
           <label>Защита от повторов, сек.<input id="cooldownSeconds" type="number" min="20" max="600" value="75"></label>
           <label>Стакан по умолчанию, мл<input id="defaultWater" type="number" min="20" max="2000" value="250"></label>
           <label class="check"><input id="autoScan" type="checkbox" checked> Автоматически анализировать</label>
