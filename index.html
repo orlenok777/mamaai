@@ -3,62 +3,77 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#081a17">
-  <title>MamaAI Health Vision</title>
+  <meta name="theme-color" content="#071a17">
+  <title>MamaAI Health Vision 2.0</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="stylesheet" href="styles.css">
-  <script defer src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <script defer src="app.js"></script>
 </head>
 <body>
   <main class="shell">
-    <header>
-      <div><span class="eyebrow">Персональный помощник Романа</span><h1>MamaAI <em>Health Vision</em></h1></div>
-      <span id="status" class="status" aria-live="polite">Готов к запуску</span>
+    <header class="topbar">
+      <div><span class="eyebrow">MamaAI • Web 2.0</span><h1>Health <em>Vision</em></h1></div>
+      <div class="badges"><span id="onlineBadge" class="badge">Онлайн</span><span id="cameraBadge" class="badge off">Камера</span><span id="micBadge" class="badge off">Микрофон</span></div>
     </header>
 
     <section class="hero">
       <div class="camera-card">
-        <video id="video" playsinline muted></video><canvas id="overlay"></canvas>
-        <div id="cameraPlaceholder" class="placeholder"><div class="lens">◉</div><b>Камера выключена</b><span>Нажмите «Начать наблюдение»</span></div>
+        <video id="video" playsinline autoplay muted></video>
+        <canvas id="capture" hidden></canvas>
+        <div id="placeholder" class="placeholder"><div class="lens">◉</div><b>Камера выключена</b><span>Нажмите «Запустить помощника»</span></div>
+        <div id="scanFlash" class="scan-flash"></div>
         <div class="controls">
-          <button id="startBtn" class="primary">▶ Начать наблюдение</button>
-          <button id="medicineScanBtn" disabled>💊 Проверить лекарство</button>
-          <button id="stopBtn" disabled>Остановить</button>
+          <button id="startBtn" class="primary">▶ Запустить помощника</button>
+          <button id="scanBtn" disabled>📷 Проверить сейчас</button>
+          <button id="switchBtn" disabled>↻ Сменить камеру</button>
+          <button id="stopBtn" disabled>■ Остановить</button>
         </div>
       </div>
+
       <aside class="today">
         <span class="eyebrow">Сегодня</span>
         <div class="metric"><strong id="waterTotal">0</strong><span>мл воды</span></div>
+        <div class="metric"><strong id="waterCount">0</strong><span>эпизодов питья</span></div>
         <div class="metric"><strong id="medicineTotal">0</strong><span>приёмов лекарств</span></div>
-        <div id="assistantText" class="assistant" aria-live="assertive">Я замечу стакан или бутылку, а перед записью обязательно спрошу вас.</div>
+        <div id="assistantText" class="assistant" aria-live="assertive">Я увижу предметы в руках и обязательно спрошу вас перед записью.</div>
         <div class="listening"><span id="micDot"></span><span id="micState">Микрофон ожидает диалога</span></div>
       </aside>
     </section>
 
     <section class="grid">
       <article>
-        <h2>Быстрая запись</h2>
-        <div class="quick"><button data-action="water">＋ Вода</button><button data-action="medicine">＋ Лекарство</button></div>
-        <p class="hint">Если камера не распознала предмет, можно начать тот же голосовой диалог вручную.</p>
-        <button id="exportBtn" class="wide">Скачать журнал CSV</button>
+        <h2>Подключение Google AI</h2>
+        <label class="field"><span>Gemini API key</span><input id="apiKey" type="password" autocomplete="off" placeholder="Вставьте ключ один раз"></label>
+        <label class="check"><input id="rememberKey" type="checkbox"> Запомнить ключ в этом браузере</label>
+        <button id="saveKeyBtn" class="wide">Подключить Google AI</button>
+        <p id="keyStatus" class="hint">Ключ нужен для распознавания действий и текста на лекарствах.</p>
+      </article>
+
+      <article>
+        <h2>Автоматический режим</h2>
+        <div class="settings">
+          <label>Проверять кадр каждые, сек.<input id="scanSeconds" type="number" min="5" max="120" value="12"></label>
+          <label>Защита от повторов, сек.<input id="cooldownSeconds" type="number" min="20" max="600" value="75"></label>
+          <label>Стакан по умолчанию, мл<input id="defaultWater" type="number" min="20" max="2000" value="250"></label>
+          <label class="check"><input id="autoScan" type="checkbox" checked> Автоматически анализировать</label>
+        </div>
+        <div class="quick"><button data-action="water">＋ Записать воду голосом</button><button data-action="medicine">＋ Записать лекарство голосом</button></div>
+      </article>
+    </section>
+
+    <section class="grid lower">
+      <article>
+        <div class="title-row"><h2>Что видит AI</h2><span id="confidence" class="confidence">—</span></div>
+        <p id="scene" class="scene">Камера ещё не анализировала изображение.</p>
+        <div id="objects" class="chips"></div>
       </article>
       <article>
-        <div class="title-row"><h2>Журнал здоровья</h2><button id="clearBtn" class="link">Очистить</button></div>
+        <div class="title-row"><h2>Журнал здоровья</h2><div><button id="exportBtn" class="link">CSV</button><button id="clearBtn" class="link danger-text">Очистить</button></div></div>
         <div id="log" class="log"><p class="empty">Записей пока нет</p></div>
       </article>
     </section>
-    <section class="notice"><b>Важно:</b> название лекарства, прочитанное камерой, всегда требует вашего подтверждения. Приложение не определяет дозировку и не заменяет врача.</section>
-  </main>
 
-  <dialog id="dialog">
-    <form method="dialog">
-      <span id="dialogIcon" class="dialog-icon">💧</span><h2 id="dialogTitle">Подтверждение</h2><p id="dialogText"></p>
-      <label><span id="inputLabel">Количество</span><input id="detailInput" autocomplete="off"></label>
-      <div class="dialog-actions"><button value="cancel">Нет, ошибка</button><button id="confirmBtn" value="confirm" class="primary">Да, записать</button></div>
-    </form>
-  </dialog>
+    <section class="notice"><b>Важно:</b> приложение не назначает лекарства. Название и факт приёма всегда подтверждаются голосом пользователя.</section>
+  </main>
 </body>
 </html>
