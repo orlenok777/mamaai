@@ -7,8 +7,6 @@
   <title>MamaAI Health Vision 3.0</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="stylesheet" href="styles.css">
-  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/holistic/holistic.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
   <script defer src="app.js"></script>
 </head>
 <body>
@@ -60,7 +58,7 @@
       <label class="field"><span>Gemini API key</span><input id="apiKey" type="password" autocomplete="off" placeholder="Вставьте ключ"></label>
       <label class="check"><input id="rememberKey" type="checkbox"> Запомнить ключ в браузере</label>
       <button id="saveKeyBtn" class="wide">Подключить Google AI</button>
-      <p id="keyStatus" class="hint">Ключ используется только для анализа кадров с водой и лекарствами.</p>
+      <p id="keyStatus" class="hint">Необязательно: без ключа работают камера, лицо, руки, тело, графика и голос. Gemini нужен только для воды и лекарств.</p>
     </article>
 
     <article>
@@ -100,6 +98,10 @@
     </article>
   </section>
 
+  <section class="diagnostics">
+    <div class="title-row"><h2>Самодиагностика</h2><button id="selfTestBtn">Проверить всё</button></div>
+    <div id="selfTestResults" class="test-results"></div>
+  </section>
   <section class="notice"><b>Важно:</b> анализ улыбки, осанки, активности и падения является ориентировочным и не является медицинским диагнозом.</section>
   <div id="voiceConfirmBar" class="voice-confirm" hidden><span>🎙️ Скажите «да» или «нет»</span><button id="voiceNoBtn">Нет</button><button id="voiceYesBtn" class="primary">Да</button></div>
 </main>
