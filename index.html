@@ -3,93 +3,105 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#071a17">
-  <title>MamaAI Health Vision 2.0</title>
+  <meta name="theme-color" content="#061512">
+  <title>MamaAI Health Vision 3.0</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/holistic/holistic.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
   <script defer src="app.js"></script>
 </head>
 <body>
-  <main class="shell">
-    <header class="topbar">
-      <div><span class="eyebrow">MamaAI • Web 2.0</span><h1>Health <em>Vision</em></h1></div>
-      <div class="badges"><span id="onlineBadge" class="badge">Онлайн</span><span id="cameraBadge" class="badge off">Камера</span><span id="micBadge" class="badge off">Микрофон</span><span id="handBadge" class="badge off">Руки</span></div>
-    </header>
+<main class="shell">
+  <header class="topbar">
+    <div><span class="eyebrow">MamaAI • Vision 3.0</span><h1>Health <em>Vision</em></h1></div>
+    <div class="badges"><span class="badge on">Онлайн</span><span id="cameraBadge" class="badge off">Камера</span><span id="micBadge" class="badge off">Микрофон</span><span id="bodyBadge" class="badge off">Тело</span><span id="handBadge" class="badge off">Кисти</span><span id="faceBadge" class="badge off">Лицо</span></div>
+  </header>
 
-    <section class="hero">
-      <div class="camera-card">
-        <video id="video" playsinline autoplay muted></video>
-        <canvas id="capture" hidden></canvas>
-        <canvas id="tracking" class="tracking-overlay"></canvas>
-        <div id="placeholder" class="placeholder"><div class="lens">◉</div><b>Камера выключена</b><span>Нажмите «Запустить помощника»</span></div>
-        <div id="scanFlash" class="scan-flash"></div>
-        <div class="controls">
-          <button id="startBtn" class="primary">▶ Запустить помощника</button>
-          <button id="scanBtn" disabled>📷 Проверить сейчас</button>
-          <button id="switchBtn" disabled>↻ Сменить камеру</button>
-          <button id="stopBtn" disabled>■ Остановить</button>
-        </div>
+  <section class="hero">
+    <div class="camera-card">
+      <video id="video" playsinline autoplay muted></video>
+      <canvas id="overlay"></canvas>
+      <canvas id="capture" hidden></canvas>
+      <div id="placeholder" class="placeholder"><div class="lens">◉</div><b>Камера выключена</b><span>Нажмите «Запустить помощника»</span></div>
+      <div id="scanFlash" class="scan-flash"></div>
+      <div class="hud"><span id="fpsHud">0 FPS</span><span id="trackingHud">Ожидание</span><span id="gestureHud">Жестов нет</span></div>
+      <div class="controls">
+        <button id="startBtn" class="primary">▶ Запустить помощника</button>
+        <button id="scanBtn" disabled>📷 Проверить сейчас</button>
+        <button id="switchBtn" disabled>↻ Камера</button>
+        <button id="stopBtn" disabled>■ Остановить</button>
       </div>
-
-      <aside class="today">
-        <span class="eyebrow">Сегодня</span>
-        <div class="metric"><strong id="waterTotal">0</strong><span>мл воды</span></div>
-        <div class="metric"><strong id="waterCount">0</strong><span>эпизодов питья</span></div>
-        <div class="metric"><strong id="medicineTotal">0</strong><span>приёмов лекарств</span></div>
-        <div id="assistantText" class="assistant" aria-live="assertive">Я локально отслеживаю руки, анализирую серию кадров и постоянно слушаю только команды о воде и лекарствах.</div>
-        <div class="listening"><span id="micDot"></span><span id="micState">Микрофон ожидает диалога</span></div>
-        <div class="telemetry">
-          <span>Лицо <b id="faceMetric">—</b></span><span>Голова <b id="headMetric">—</b></span>
-          <span>Моргание <b id="blinkMetric">—</b></span><span>Улыбка <b id="smileMetric">—</b></span>
-          <span>Руки <b id="handsMetric">0</b></span><span>Жест <b id="gestureMetric">—</b></span>
-          <span>Поза <b id="poseMetric">—</b></span><span>FPS <b id="fpsMetric">0</b></span>
-          <span>Нагрузка <b id="loadMetric">—</b></span>
-        </div>
-      </aside>
-    </section>
-
-    <section class="grid">
-      <article>
-        <h2>Подключение Google AI</h2>
-        <label class="field"><span>Gemini API key</span><input id="apiKey" type="password" autocomplete="off" placeholder="Вставьте ключ один раз"></label>
-        <label class="check"><input id="rememberKey" type="checkbox"> Запомнить ключ в этом браузере</label>
-        <button id="saveKeyBtn" class="wide">Подключить Google AI</button>
-        <p id="keyStatus" class="hint">Используется бесплатный Gemini 2.5 Flash-Lite. Автоматический анализ ограничен для экономии квоты; локальное распознавание рук продолжает работать постоянно.</p>
-      </article>
-
-      <article>
-        <h2>Автоматический режим</h2>
-        <div class="settings">
-          <label>Проверять кадр каждые, сек.<input id="scanSeconds" type="number" min="15" max="300" value="30"></label>
-          <label>Защита от повторов, сек.<input id="cooldownSeconds" type="number" min="20" max="600" value="75"></label>
-          <label>Стакан по умолчанию, мл<input id="defaultWater" type="number" min="20" max="2000" value="250"></label>
-          <label class="check"><input id="autoScan" type="checkbox" checked> Автоматически анализировать</label>
-          <label class="check"><input id="showFace" type="checkbox" checked> Сетка лица</label>
-          <label class="check"><input id="showHands" type="checkbox" checked> Скелет рук</label>
-          <label class="check"><input id="showPose" type="checkbox" checked> Скелет тела</label>
-        </div>
-        <div class="quick"><button data-action="water">＋ Записать воду голосом</button><button data-action="medicine">＋ Записать лекарство голосом</button></div>
-      </article>
-    </section>
-
-    <section class="grid lower">
-      <article>
-        <div class="title-row"><h2>Что видит AI</h2><span id="confidence" class="confidence">—</span></div>
-        <p id="scene" class="scene">Камера ещё не анализировала изображение.</p>
-        <div id="objects" class="chips"></div>
-      </article>
-      <article>
-        <div class="title-row"><h2>Журнал здоровья</h2><div><button id="exportBtn" class="link">CSV</button><button id="clearBtn" class="link danger-text">Очистить</button></div></div>
-        <div id="log" class="log"><p class="empty">Записей пока нет</p></div>
-      </article>
-    </section>
-
-    <section class="notice"><b>Важно:</b> приложение не назначает лекарства. Название и факт приёма всегда подтверждаются голосом пользователя.</section>
-    <div id="voiceConfirmBar" class="voice-confirm" hidden>
-      <span>🎙️ Скажите «да» или «нет»</span>
-      <button id="voiceNoBtn" type="button">Нет</button>
-      <button id="voiceYesBtn" type="button" class="primary">Да</button>
     </div>
-  </main>
+
+    <aside class="today">
+      <span class="eyebrow">Живой анализ</span>
+      <div class="vitals">
+        <div><span>Кисти</span><strong id="handsNow">0</strong></div>
+        <div><span>Улыбка</span><strong id="smileNow">—</strong></div>
+        <div><span>Осанка</span><strong id="postureNow">—</strong></div>
+        <div><span>Активность</span><strong id="activityNow">—</strong></div>
+      </div>
+      <div id="assistantText" class="assistant" aria-live="assertive">Я буду рисовать цифровой скелет, кисти, пальцы и лицо поверх изображения.</div>
+      <div class="listening"><span id="micDot"></span><span id="micState">Микрофон ожидает диалога</span></div>
+    </aside>
+  </section>
+
+  <section class="stats">
+    <article class="metric-card"><span>Вода сегодня</span><strong id="waterTotal">0 мл</strong><small id="waterCount">0 эпизодов</small></article>
+    <article class="metric-card"><span>Лекарства</span><strong id="medicineTotal">0</strong><small>подтверждено голосом</small></article>
+    <article class="metric-card"><span>Движение</span><strong id="movementMinutes">0 мин</strong><small>оценка активности</small></article>
+    <article class="metric-card"><span>Сидение</span><strong id="idleMinutes">0 мин</strong><small>без заметного движения</small></article>
+  </section>
+
+  <section class="grid">
+    <article>
+      <h2>Google AI</h2>
+      <label class="field"><span>Gemini API key</span><input id="apiKey" type="password" autocomplete="off" placeholder="Вставьте ключ"></label>
+      <label class="check"><input id="rememberKey" type="checkbox"> Запомнить ключ в браузере</label>
+      <button id="saveKeyBtn" class="wide">Подключить Google AI</button>
+      <p id="keyStatus" class="hint">Ключ используется только для анализа кадров с водой и лекарствами.</p>
+    </article>
+
+    <article>
+      <h2>Умные функции</h2>
+      <div class="settings switches">
+        <label class="check"><input id="autoScan" type="checkbox" checked> Автоанализ воды и лекарств</label>
+        <label class="check"><input id="showFace" type="checkbox" checked> Сетка лица</label>
+        <label class="check"><input id="showHands" type="checkbox" checked> Кисти и пальцы</label>
+        <label class="check"><input id="showPose" type="checkbox" checked> Скелет тела</label>
+        <label class="check"><input id="postureAlerts" type="checkbox" checked> Напоминания об осанке</label>
+        <label class="check"><input id="movementAlerts" type="checkbox" checked> Напоминания размяться</label>
+      </div>
+      <div class="settings compact">
+        <label>Анализ Gemini, сек.<input id="scanSeconds" type="number" min="10" max="300" value="25"></label>
+        <label>Повтор события, сек.<input id="cooldownSeconds" type="number" min="20" max="600" value="75"></label>
+        <label>Стакан по умолчанию<input id="defaultWater" type="number" min="20" max="2000" value="250"></label>
+      </div>
+      <div class="quick"><button data-action="water">＋ Вода голосом</button><button data-action="medicine">＋ Лекарство голосом</button></div>
+    </article>
+  </section>
+
+  <section class="grid lower">
+    <article>
+      <div class="title-row"><h2>Что видит AI</h2><span id="confidence" class="confidence">—</span></div>
+      <p id="scene" class="scene">Кадр ещё не анализировался.</p>
+      <div id="objects" class="chips"></div>
+      <div class="signals">
+        <div><span>Рука у лица</span><strong id="handFaceSignal">нет</strong></div>
+        <div><span>Наклон головы</span><strong id="headTiltSignal">—</strong></div>
+        <div><span>Плечи</span><strong id="shoulderSignal">—</strong></div>
+        <div><span>Возможное падение</span><strong id="fallSignal">нет</strong></div>
+      </div>
+    </article>
+    <article>
+      <div class="title-row"><h2>Журнал здоровья</h2><div><button id="exportBtn" class="link">CSV</button><button id="clearBtn" class="link danger-text">Очистить</button></div></div>
+      <div id="log" class="log"><p class="empty">Записей пока нет</p></div>
+    </article>
+  </section>
+
+  <section class="notice"><b>Важно:</b> анализ улыбки, осанки, активности и падения является ориентировочным и не является медицинским диагнозом.</section>
+  <div id="voiceConfirmBar" class="voice-confirm" hidden><span>🎙️ Скажите «да» или «нет»</span><button id="voiceNoBtn">Нет</button><button id="voiceYesBtn" class="primary">Да</button></div>
+</main>
 </body>
 </html>
