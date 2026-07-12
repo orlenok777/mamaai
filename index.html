@@ -46,13 +46,13 @@
         <label class="field"><span>Gemini API key</span><input id="apiKey" type="password" autocomplete="off" placeholder="Вставьте ключ один раз"></label>
         <label class="check"><input id="rememberKey" type="checkbox"> Запомнить ключ в этом браузере</label>
         <button id="saveKeyBtn" class="wide">Подключить Google AI</button>
-        <p id="keyStatus" class="hint">Ключ используется только из этого браузера. Для постоянной работы безопаснее следующий серверный этап с временными токенами.</p>
+        <p id="keyStatus" class="hint">Используется бесплатный Gemini 2.5 Flash-Lite. Автоматический анализ ограничен для экономии квоты; локальное распознавание рук продолжает работать постоянно.</p>
       </article>
 
       <article>
         <h2>Автоматический режим</h2>
         <div class="settings">
-          <label>Проверять кадр каждые, сек.<input id="scanSeconds" type="number" min="5" max="120" value="8"></label>
+          <label>Проверять кадр каждые, сек.<input id="scanSeconds" type="number" min="15" max="300" value="30"></label>
           <label>Защита от повторов, сек.<input id="cooldownSeconds" type="number" min="20" max="600" value="75"></label>
           <label>Стакан по умолчанию, мл<input id="defaultWater" type="number" min="20" max="2000" value="250"></label>
           <label class="check"><input id="autoScan" type="checkbox" checked> Автоматически анализировать</label>
